@@ -1,0 +1,9 @@
+flask
+flask-cors
+gunicorn
+joblib
+pandas
+numpy
+shap
+opencv-python-headless
+tensorflow==2.15.0
