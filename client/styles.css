@@ -1,0 +1,297 @@
+* { box-sizing: border-box; font-family: "Inter", sans-serif; }
+
+body {
+  margin: 0;
+  background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+}
+
+.app-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  color: #fff;
+  margin-bottom: 40px;
+}
+
+header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+h2 { margin-top: 0; color: #203a43; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.form-group label { font-weight: 600; }
+
+input, select {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.primary-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  background: linear-gradient(135deg, #203a43, #2c5364);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+}
+
+.secondary-btn {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  background: #f8fafc;
+  color: #203a43;
+  border: 2px dashed #2c5364;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.result { animation: fadeIn 0.5s ease-in-out; }
+.hidden { display: none; }
+
+.risk-text { font-size: 22px; font-weight: 700; }
+.low { color: #1b8a3b; }
+.high { color: #c0392b; }
+
+.explanation {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.explanation h3 { margin-bottom: 10px; color: #203a43; }
+.explanation ul { padding-left: 18px; }
+.explanation li { margin-bottom: 6px; font-size: 14px; }
+
+.gradcam-wrapper {
+  margin-top: 25px;
+  text-align: center;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.gradcam-img {
+  width: 320px;
+  height: 320px;
+  object-fit: contain;
+  border-radius: 14px;
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+  background: #000;
+}
+
+.gradcam-caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #555;
+}
+
+footer {
+  text-align: center;
+  color: #ddd;
+  font-size: 13px;
+  margin-top: 20px;
+}
+
+.hint {
+  font-size: 13px;
+  color: #555;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================
+   GRAD-CAM OVERLAY
+   ===================== */
+
+.gradcam-wrapper {
+  margin-top: 25px;
+  text-align: center;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.gradcam-container {
+  position: relative;
+  display: inline-block;
+  width: 320px;
+  height: 320px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+  background: #000;
+}
+
+.gradcam-base {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.gradcam-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.5; /* Grad-CAM transparency */
+}
+
+.gradcam-caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #555;
+}
+
+/* ----------------------------
+   Result Card Layout
+---------------------------- */
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.5s ease-in-out;
+  max-height: 80vh;        /* prevent collapsing */
+  overflow-y: auto;        /* scroll if content overflows */
+  padding-bottom: 20px;
+}
+
+.explanation {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.explanation > div {
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-height: 200px;
+  overflow-y: auto;        /* scroll for long lists */
+  padding: 10px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.explanation h3 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #203a43;
+}
+
+.risk-text {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.prob-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #555;
+}
+
+/* Feature maps container */
+#featureMapsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+#featureMapsContainer img {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* Grad-CAM Overlay */
+.gradcam-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gradcam-container {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  margin-top: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+}
+
+.gradcam-base, .gradcam-overlay {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.gradcam-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.5;
+}
+
+.gradcam-caption {
+  margin-top: 5px;
+  font-size: 13px;
+  color: #555;
+  text-align: center;
+}
+
+.feature-map {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  margin: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
