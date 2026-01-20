@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Explainable Cardiovascular Risk Assessment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="app-container">
+
+  <header>
+    <h1>Explainable Cardiovascular Risk Assessment</h1>
+    <p class="subtitle">
+      AI-powered clinical decision support with transparent explanations
+    </p>
+  </header>
+
+  <!-- ================= CLINICAL DATA ================= -->
+  <section class="card">
+    <h2>Clinical Information</h2>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Age</label>
+        <input id="age" type="number" value="50">
+      </div>
+
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="gender">
+          <option value="1">Male</option>
+          <option value="2">Female</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Height (cm)</label>
+        <input id="height" type="number" value="170">
+      </div>
+
+      <div class="form-group">
+        <label>Weight (kg)</label>
+        <input id="weight" type="number" value="75">
+      </div>
+
+      <div class="form-group">
+        <label>Systolic BP</label>
+        <input id="ap_hi" type="number" value="130">
+      </div>
+
+      <div class="form-group">
+        <label>Diastolic BP</label>
+        <input id="ap_lo" type="number" value="85">
+      </div>
+
+      <div class="form-group">
+        <label>Cholesterol</label>
+        <select id="cholesterol">
+          <option value="1">Normal</option>
+          <option value="2">Above Normal</option>
+          <option value="3">High</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Glucose</label>
+        <select id="gluc">
+          <option value="1">Normal</option>
+          <option value="2">Above Normal</option>
+          <option value="3">High</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Smoking</label>
+        <select id="smoke">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Alcohol</label>
+        <select id="alco">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Physical Activity</label>
+        <select id="active">
+          <option value="1">Active</option>
+          <option value="0">Inactive</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= IMAGE ================= -->
+  <section class="card">
+    <h2>Cardiac Imaging (Optional)</h2>
+    <input type="file" id="imageInput" accept="image/*">
+    <p class="hint">CT or MRI scans are used only for explainability</p>
+  </section>
+
+  <button class="secondary-btn" onclick="loadSampleData()" type="button">
+    Load Sample Patient Data
+  </button>
+
+  <button class="primary-btn" onclick="predict()" type="button">Run Assessment</button>
+
+  <!-- ================= RESULTS ================= -->
+  <section class="card result hidden" id="resultBox">
+    <h2>Risk Assessment Result</h2>
+    <p id="riskText" class="risk-text"></p>
+    <p id="probText" class="prob-text"></p>
+
+    <div class="explanation">
+      <div>
+        <h3>Risk Increasing Factors</h3>
+        <ul id="riskUp"></ul>
+      </div>
+
+      <div>
+        <h3>Risk Reducing Factors</h3>
+        <ul id="riskDown"></ul>
+      </div>
+    </div>
+
+    <h2>Feature Maps (First Conv Layer)</h2>
+<div id="featureMapsContainer" style="display:flex; flex-wrap:wrap;"></div>
+
+
+    <div class="gradcam-wrapper hidden" id="gradcamWrapper">
+    <div class="gradcam-container">
+      <img id="originalImg" class="gradcam-base">
+      <img id="gradcamImg" class="gradcam-overlay">
+    </div>
+    <p class="gradcam-caption">Highlighted regions influencing CNN prediction</p>
+  </div>
+
+  </section>
+
+  <footer>
+    <p>Academic decision-support system · Not a medical diagnosis</p>
+  </footer>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
