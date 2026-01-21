@@ -2,9 +2,9 @@
 // Sample Patients (Placeholder Images)
 // =============================
 let samplePatients = [
-  {label:"Young Adult", age:28, gender:1, height:175, weight:68, ap_hi:118, ap_lo:76, cholesterol:1, gluc:1, smoke:0, alco:0, active:1, image:"static/images/img-1.jpg"},
-  {label:"Middle-aged", age:52, gender:1, height:170, weight:88, ap_hi:150, ap_lo:95, cholesterol:3, gluc:2, smoke:1, alco:1, active:0, image:"static/images/img-2.jpg"},
-  {label:"Elderly", age:67, gender:2, height:160, weight:72, ap_hi:165, ap_lo:100, cholesterol:3, gluc:3, smoke:0, alco:0, active:0, image:"static/images/img-3.webp"}
+  {label:"Young Adult", age:28, gender:1, height:175, weight:68, ap_hi:118, ap_lo:76, cholesterol:1, gluc:1, smoke:0, alco:0, active:1, image:"static/images/img-1.jpeg"},
+  {label:"Middle-aged", age:52, gender:1, height:170, weight:88, ap_hi:150, ap_lo:95, cholesterol:3, gluc:2, smoke:1, alco:1, active:0, image:"static/images/img-2.jpeg"},
+  {label:"Elderly", age:67, gender:2, height:160, weight:72, ap_hi:165, ap_lo:100, cholesterol:3, gluc:3, smoke:0, alco:0, active:0, image:"static/images/img-1.jpeg"}
 ];
 
 // =============================
@@ -133,5 +133,6 @@ function sendToServer(formData){
   })
   .catch(err => console.error("Feature maps error:", err));
 }
+
 
 
