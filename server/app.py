@@ -1,3 +1,4 @@
+# app.py  ✅ Render-ready (Flask + TF + Joblib) | Works with your Vercel frontend
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
@@ -10,7 +11,7 @@ from PIL import Image
 
 app = Flask(__name__)
 
-# ✅ Allow only your Vercel frontend origin (recommended)
+# ✅ CORS (allow your Vercel frontend + local dev)
 CORS(app, resources={
     r"/*": {
         "origins": [
@@ -21,13 +22,19 @@ CORS(app, resources={
 })
 
 # ----------------------------
-# LOAD TEXT MODEL
+# PATHS
 # ----------------------------
 TEXT_MODEL_PATH = "cardio_model.pkl"
 SCALER_PATH = "scaler.pkl"
+IMG_SIZE = 224
+CNN_MODEL_PATH = "models/ct_mri_cnn.h5"   # ✅ keep your model in this path
 
+# ----------------------------
+# LOAD TEXT MODEL
+# ----------------------------
 if not os.path.exists(TEXT_MODEL_PATH):
     raise FileNotFoundError(f"Missing file: {TEXT_MODEL_PATH}")
+
 if not os.path.exists(SCALER_PATH):
     raise FileNotFoundError(f"Missing file: {SCALER_PATH}")
 
@@ -37,18 +44,22 @@ scaler = joblib.load(SCALER_PATH)
 TEXT_FEATURES = ["age","gender","height","weight","ap_hi","ap_lo","cholesterol","gluc","smoke","alco","active"]
 
 # ----------------------------
-# LOAD IMAGE MODEL
+# LOAD IMAGE MODEL (RGB)
 # ----------------------------
-IMG_SIZE = 224
-cnn_model_path = "models/ct_mri_cnn.h5"
+if not os.path.exists(CNN_MODEL_PATH):
+    raise FileNotFoundError(f"Missing model file: {CNN_MODEL_PATH}")
 
-if not os.path.exists(cnn_model_path):
-    raise FileNotFoundError(f"Missing model file: {cnn_model_path}")
-
-image_model = tf.keras.models.load_model(cnn_model_path)
+image_model = tf.keras.models.load_model(CNN_MODEL_PATH)
 
 # ----------------------------
-# TEXT RISK PREDICTION
+# HEALTH CHECK
+# ----------------------------
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"status": "Backend running"}), 200
+
+# ----------------------------
+# TEXT PREDICTION
 # ----------------------------
 @app.route("/predict/text", methods=["POST"])
 def predict_text():
@@ -71,7 +82,7 @@ def predict_text():
     })
 
 # ----------------------------
-# IMAGE PREDICTION + Grad-CAM
+# GRAD-CAM FUNCTIONS
 # ----------------------------
 def make_gradcam_heatmap(img_array, model):
     last_conv_layer = None
@@ -79,6 +90,9 @@ def make_gradcam_heatmap(img_array, model):
         if isinstance(layer, tf.keras.layers.Conv2D):
             last_conv_layer = layer
             break
+
+    if last_conv_layer is None:
+        raise ValueError("No Conv2D layer found in the model for Grad-CAM.")
 
     inputs = tf.keras.Input(shape=model.input_shape[1:])
     x = inputs
@@ -89,8 +103,7 @@ def make_gradcam_heatmap(img_array, model):
         if layer == last_conv_layer:
             conv_output = x
 
-    preds_output = x
-    grad_model = tf.keras.Model(inputs, [conv_output, preds_output])
+    grad_model = tf.keras.Model(inputs, [conv_output, x])
 
     with tf.GradientTape() as tape:
         img_array = tf.cast(img_array, tf.float32)
@@ -108,28 +121,32 @@ def make_gradcam_heatmap(img_array, model):
 
     return heatmap.numpy()
 
-def overlay_gradcam(original_img, heatmap, alpha=0.4):
+def overlay_gradcam(original_img_rgb, heatmap, alpha=0.4):
+    # original_img_rgb : (224,224,3) in 0..1 range
     heatmap = cv2.resize(heatmap, (IMG_SIZE, IMG_SIZE))
     heatmap = np.uint8(255 * heatmap)
     heatmap_color = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
 
-    original_img = np.uint8(original_img * 255)
-    if len(original_img.shape) == 2:
-        original_img = cv2.cvtColor(original_img, cv2.COLOR_GRAY2BGR)
+    original_img = np.uint8(original_img_rgb * 255)
+    original_img_bgr = cv2.cvtColor(original_img, cv2.COLOR_RGB2BGR)
 
-    overlay = cv2.addWeighted(original_img, 1 - alpha, heatmap_color, alpha, 0)
+    overlay = cv2.addWeighted(original_img_bgr, 1 - alpha, heatmap_color, alpha, 0)
     return overlay
 
+# ----------------------------
+# IMAGE PREDICTION (RGB MODEL)
+# ----------------------------
 @app.route("/predict/image", methods=["POST"])
 def predict_image():
     if "image" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files["image"]
-    img = Image.open(file).convert("L").resize((IMG_SIZE, IMG_SIZE))
 
-    img_array = np.array(img) / 255.0
-    input_array = np.expand_dims(img_array, axis=(0, -1))
+    # ✅ IMPORTANT: model expects RGB (224,224,3)
+    img = Image.open(file).convert("RGB").resize((IMG_SIZE, IMG_SIZE))
+    img_array = np.array(img) / 255.0  # (224,224,3)
+    input_array = np.expand_dims(img_array, axis=0)  # (1,224,224,3)
 
     _ = image_model.predict(input_array, verbose=0)
 
@@ -150,12 +167,15 @@ def feature_maps():
         return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files["image"]
-    img = Image.open(file).convert("L").resize((IMG_SIZE, IMG_SIZE))
 
+    img = Image.open(file).convert("RGB").resize((IMG_SIZE, IMG_SIZE))
     img_array = np.array(img) / 255.0
-    input_array = np.expand_dims(img_array, axis=(0, -1))
+    input_array = np.expand_dims(img_array, axis=0)
 
-    layer = next(l for l in image_model.layers if isinstance(l, tf.keras.layers.Conv2D))
+    layer = next((l for l in image_model.layers if isinstance(l, tf.keras.layers.Conv2D)), None)
+    if layer is None:
+        return jsonify({"error": "No Conv2D layer found in model"}), 500
+
     feature_model = tf.keras.Model(inputs=image_model.inputs, outputs=layer.output)
     feature_maps_out = feature_model.predict(input_array, verbose=0)
 
@@ -163,6 +183,9 @@ def feature_maps():
     for i in range(min(6, feature_maps_out.shape[-1])):
         fmap = feature_maps_out[0, :, :, i]
         fmap = cv2.resize(fmap, (IMG_SIZE, IMG_SIZE))
+        fmap = fmap - np.min(fmap)
+        if np.max(fmap) != 0:
+            fmap = fmap / np.max(fmap)
         fmap = np.uint8(255 * fmap)
 
         _, buf = cv2.imencode(".png", fmap)
@@ -171,11 +194,9 @@ def feature_maps():
 
     return jsonify({"feature_maps": fm_list})
 
-# ✅ Health check endpoint (Render uses this sometimes)
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"status": "Backend running"}), 200
-
+# ----------------------------
+# MAIN (Render PORT)
+# ----------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
