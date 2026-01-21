@@ -42,7 +42,7 @@ function predict() {
   };
 
   // ---- TEXT RISK PREDICTION ----
-  fetch("http://127.0.0.1:5000/predict/text", {
+  fetch("https://cardio-disease-dl01.onrender.com/predict/text", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify(textData)
@@ -103,7 +103,7 @@ function sendImageToBackend(file, filename) {
 
 function sendToServer(formData){
   // Send to Grad-CAM endpoint
-  fetch("http://127.0.0.1:5000/predict/image", {
+  fetch("https://cardio-disease-dl01.onrender.com/predict/image", {
     method: "POST",
     body: formData
   })
@@ -116,7 +116,7 @@ function sendToServer(formData){
   .catch(err => console.error("Grad-CAM error:", err));
 
   // Send to Feature Maps endpoint
-  fetch("http://127.0.0.1:5000/feature_maps", {
+  fetch("https://cardio-disease-dl01.onrender.com/feature_maps", {
     method: "POST",
     body: formData
   })
@@ -133,4 +133,5 @@ function sendToServer(formData){
   })
   .catch(err => console.error("Feature maps error:", err));
 }
+
 
