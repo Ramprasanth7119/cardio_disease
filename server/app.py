@@ -40,7 +40,7 @@ TEXT_FEATURES = ["age","gender","height","weight","ap_hi","ap_lo","cholesterol",
 # LOAD IMAGE MODEL
 # ----------------------------
 IMG_SIZE = 224
-cnn_model_path = "models/cnn_model.h5"
+cnn_model_path = "models/ct_mri_cnn.h5"
 
 if not os.path.exists(cnn_model_path):
     raise FileNotFoundError(f"Missing model file: {cnn_model_path}")
